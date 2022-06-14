@@ -8,6 +8,7 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,13 +43,10 @@ public class JPAUnitTestCase {
 		entityManager.getTransaction().begin();
 		final TypedQuery<Entity> eQuery = entityManager.createQuery("FROM Entity AS e",
 			Entity.class);
-		eQuery.getResultList().stream()
-			.map(e -> e.getLabel() + ": " + e.getUri())
-			.forEach(System.out::println);
+		Assert.assertEquals(1, eQuery.getResultList().size());
 		final TypedQuery<EntityDTO> dtoQuery = entityManager.createQuery(
 			"SELECT new org.hibernate.bugs.EntityDTO(e.label, e.uri) FROM Entity AS e", EntityDTO.class);
-		dtoQuery.getResultList()
-			.forEach(System.out::println);
+		Assert.assertEquals(1, dtoQuery.getResultList().size());
 		entityManager.getTransaction().commit();
 		entityManager.close();
 	}
