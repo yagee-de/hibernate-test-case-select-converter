@@ -1,12 +1,15 @@
 package org.hibernate.bugs;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import java.net.URI;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
 
 /**
  * This template demonstrates how to develop a test case for Hibernate ORM, using the Java Persistence API.
@@ -31,7 +34,21 @@ public class JPAUnitTestCase {
 	public void hhh123Test() throws Exception {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
-		// Do stuff...
+		Entity entity = new Entity();
+		entity.setLabel("hibernate");
+		entity.setUri(URI.create("https://hibernate.org/orm/"));
+		entityManager.persist(entity);
+		entityManager.getTransaction().commit();
+		entityManager.getTransaction().begin();
+		final TypedQuery<Entity> eQuery = entityManager.createQuery("FROM Entity AS e",
+			Entity.class);
+		eQuery.getResultList().stream()
+			.map(e -> e.getLabel() + ": " + e.getUri())
+			.forEach(System.out::println);
+		final TypedQuery<EntityDTO> dtoQuery = entityManager.createQuery(
+			"SELECT new org.hibernate.bugs.EntityDTO(e.label, e.uri) FROM Entity AS e", EntityDTO.class);
+		dtoQuery.getResultList()
+				.forEach(System.out::println);
 		entityManager.getTransaction().commit();
 		entityManager.close();
 	}
